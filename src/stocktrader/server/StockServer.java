@@ -74,13 +74,11 @@ public class StockServer {
         return builder.toString();
     }
 
-
     public boolean purchase(int stockNo, int quantity) {
         // Lấy danh sách cổ phiếu từ phương thức listAllStocks
         String allStocks = listAllStocks();
         // Phân tách danh sách cổ phiếu thành từng dòng
         String[] stockLines = allStocks.split("\n");
-
         Stock purchasedPossibleStock = null;
         // Tìm cổ phiếu mà người dùng muốn mua trong danh sách đã phân tách
         for (String stockLine : stockLines) {
@@ -95,7 +93,6 @@ public class StockServer {
                 break;
             }
         }
-
         // Kiểm tra xem cổ phiếu có tồn tại và số lượng mua hợp lệ
         if (purchasedPossibleStock != null && quantity > 0 && quantity <= purchasedPossibleStock.getQuanity()) {
             // Tạo thông tin cổ phiếu đã mua
@@ -119,42 +116,92 @@ public class StockServer {
             int stockNumber = stock.getStockNo();
             String stockName = stock.getName();
             int stockQuantity = stock.getQuanity();
-            LocalTime purchaseDate = stockInformation.getPurchaseDate();
-            builder.append("Command Type: ").append(commandType).append(", ")
-                    .append("Stock Number: ").append(stockNumber).append(", ")
-                    .append("Stock Name: ").append(stockName).append(", ")
-                    .append("Stock Quantity: ").append(stockQuantity).append(", ")
-                    .append("Purchase Date: ").append(purchaseDate).append("\n");
+            double stockPrice = stock.getPrice();
+            LocalTime purchaseDate = stockInformation.getTransactionDate();
+            builder .append("Command type: ").append(commandType).append(", ")
+                    .append(stockNumber).append(", ")
+                    .append("Stock No: ").append(stockName).append(", ")
+                    .append(stockQuantity).append(", ")
+                    .append("transaction date: ").append(purchaseDate).append(", ")
+                    .append(stockPrice).append("\n");
         }
 
         return builder.toString();
     }
 
+
     public boolean sellStock(int stockNo, int quantity) {
+        String myStocks = listOwnStocks();
+        String[] myStocksLines = myStocks.split("\n");
+        Stock possibleSelledStock = null;
+        for (String myStocksLine : myStocksLines) {
+            String[] stockInfo = myStocksLine.split(", ");
+            if (stockInfo.length >= 4) {
+                int stockNumber = Integer.parseInt(stockInfo[1]);
+                if (stockNumber == stockNo) {
+                    int stockQuantity = Integer.parseInt(stockInfo[3]);
+                    String stockName = stockInfo[2];
+                    double stockPrize = Double.parseDouble(stockInfo[5]);
+                    possibleSelledStock = new Stock(stockNumber, stockQuantity, stockName, stockPrize);
+                    break;
+                }
+
+            }
+        }
+        if (possibleSelledStock != null && quantity > 0 && quantity <= possibleSelledStock.getQuanity()) {
+            possibleSelledStock.setQuanity(possibleSelledStock.getQuanity() - quantity);
+            LocalTime purchaseDate = LocalTime.now();
+            StockInformation soldInfo = new StockInformation(2, possibleSelledStock, purchaseDate);
+            userStocks.add(soldInfo);
+            updateUserStocks();
+            return true;
+
+        }
         return false;
     }
 
-
-}
-
+    private void updateUserStocks() {
+        List<StockInformation> updatedUserStocks = new ArrayList<>();
+        for (StockInformation stockInformation : userStocks) {
+            if (stockInformation.getCommandType() == 2) {
+                updatedUserStocks.add(stockInformation);
+            }
+        }
+        userStocks = updatedUserStocks;
+    }
 
 //    public static void main(String[] args) {
 //        StockServer stockServer = new StockServer();
+//        System.out.println(stockServer.listAllStocks());
 //        int stockNoToPurchase = 1; // Số thứ tự của cổ phiếu bạn muốn mua
 //        int quantityToPurchase = 10; // Số lượng cổ phiếu bạn muốn mua
-//        System.out.println(stockServer.listAllStocks());
-//
 //        boolean purchaseResult = stockServer.purchase(stockNoToPurchase, quantityToPurchase);
 //        if (purchaseResult == true) {
 //            System.out.println("thành công");
+//            System.out.println(stockServer.listOwnStocks());
+//
 //        } else {
 //            System.out.println("không thành công");
 //        }
-//        System.out.println(stockServer.listOwnStocks());
-//        System.out.println("Stock còn lại trong danh sách:");
-//        System.out.println(stockServer.listAllStocks());
-//    }
-//}
+//
+//        int stockNoToSell = 1;
+//        int stockQuantityToSell = 5;
+//        if (purchaseResult == true) {
+//            {
+//                boolean sellResult = stockServer.sellStock(stockNoToSell, stockQuantityToSell);
+//                if (sellResult == true) {
+//                    System.out.println("bán thành công");
+//                    System.out.println(stockServer.listOwnStocks());
+//                }else{
+//                    System.out.println("bán ko đc");
+//                }
+//
+//            }
+//            }
+//        }
+    }
+
+
 
 
 

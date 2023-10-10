@@ -5,10 +5,10 @@ import java.time.LocalTime;
 public class StockInformation {
 
 
-    public StockInformation(int commandType, Stock stock, LocalTime purchaseDate) {
+    public StockInformation(int commandType, Stock stock, LocalTime transactionDate) {
         this.commandType = commandType;
         this.stock = stock;
-        this.purchaseDate = purchaseDate;
+        this.transactionDate = transactionDate;
     }
 
     public int getCommandType() {
@@ -27,16 +27,16 @@ public class StockInformation {
         this.stock = stock;
     }
 
-    public LocalTime getPurchaseDate() {
-        return purchaseDate;
+    public LocalTime getTransactionDate() {
+        return transactionDate;
     }
 
-    public void setPurchaseDate(LocalTime purchaseDate) {
-        this.purchaseDate = purchaseDate;
+    public void setTransactionDate(LocalTime transactionDate) {
+        this.transactionDate = transactionDate;
     }
 
     private int commandType;
     private Stock stock;
-    private LocalTime purchaseDate;
+    private LocalTime transactionDate;
 }
 

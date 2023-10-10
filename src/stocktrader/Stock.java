@@ -22,11 +22,6 @@ public class Stock {
     private int stockNo;
     private int quanity;
 
-    public Stock(int stockNo, int quanity, String name) {
-        this.stockNo = stockNo;
-        this.quanity = quanity;
-        this.name = name;
-    }
 
     public String getName() {
         return name;
@@ -37,4 +32,20 @@ public class Stock {
     }
 
     private String name;
+    private double price;
+
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
+    public Stock(int stockNo, int quanity, String name, double price) {
+        this.stockNo = stockNo;
+        this.quanity = quanity;
+        this.name = name;
+        this.price = price;
+    }
 }

@@ -7,13 +7,16 @@ import stocktrader.User;
 
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class StockServer {
 
     private List<User> users = new ArrayList<>();
-
-    List<StockInformation> userStocks = new ArrayList<>();
+    private List<Stock> stocks = new ArrayList<>();
+    private List<StockInformation> userStocks = new ArrayList<>();
+    private Map<Integer, Integer> remainingStockQuantities = new HashMap<>();
 
 
     public StockServer() {
@@ -21,35 +24,52 @@ public class StockServer {
         users.add(new User("user2", "123456"));
         users.add(new User("user3", "1234567"));
 
-        stocks.add(new Stock(1, 10, "vingroup"));
-        stocks.add(new Stock(2, 12, "barcelona"));
-        stocks.add(new Stock(3, 5, "intermiami"));
+        stocks.add(new Stock(1, 10, "vingroup", 1000));
+        stocks.add(new Stock(2, 12, "barcelona", 2000));
+        stocks.add(new Stock(3, 5, "intermiami", 3000));
 
-
+        for (Stock stock : stocks) {
+            remainingStockQuantities.put(stock.getStockNo(), stock.getQuanity());
+        }
     }
+
+    public double getStockPrice(int stockNo) {
+        for (Stock stock : stocks) {
+            if (stock.getStockNo() == stockNo) {
+                return stock.getPrice();
+            }
+        }
+        return 0; // Trả về 0 nếu không tìm thấy cổ phiếu với số thứ tự tương ứng
+    }
+
 
     public boolean login(String username, String password) {
         for (User user : users) {
             if (user.getUsername().equals(username) && user.getPassword().equals(password)) {
                 user.setLoggedIn(true);
+                System.out.println("Success");
                 return true;
             }
-
         }
+        System.out.println("Invalid username or password. Please try again.");
         return false;
-
-
     }
 
 
-    private List<Stock> stocks = new ArrayList<>();
-
     public String listAllStocks() {
+
         StringBuilder builder = new StringBuilder();
         for (Stock stock : stocks) {
-            builder.append(stock.getStockNo()).append(", ")
-                    .append(stock.getQuanity()).append(", ")
-                    .append(stock.getName()).append("\n");
+//            int stockQuantity = stock.getQuanity();
+            int stockNo = stock.getStockNo();
+            int remainingQuantity = remainingStockQuantities.get(stockNo); // Get the remaining quantity
+            String stockName = stock.getName();
+            double stockPrice = stock.getPrice();
+            builder.append(stockNo).append(", ")
+                    .append(remainingQuantity).append(", ") // Display the remaining quantity
+                    .append(stockName).append(", ")
+                    .append(stockPrice).append("\n");
+
         }
         return builder.toString();
     }
@@ -58,23 +78,20 @@ public class StockServer {
     public boolean purchase(int stockNo, int quantity) {
         // Lấy danh sách cổ phiếu từ phương thức listAllStocks
         String allStocks = listAllStocks();
-
         // Phân tách danh sách cổ phiếu thành từng dòng
         String[] stockLines = allStocks.split("\n");
 
         Stock purchasedPossibleStock = null;
-
         // Tìm cổ phiếu mà người dùng muốn mua trong danh sách đã phân tách
         for (String stockLine : stockLines) {
             String[] stockInfo = stockLine.split(", ");
             int stockNumber = Integer.parseInt(stockInfo[0]);
-
             if (stockNumber == stockNo) {
                 int stockQuantity = Integer.parseInt(stockInfo[1]);
                 String stockName = stockInfo[2];
-
+                double stockPrice = Double.parseDouble(stockInfo[3]);
                 // Tạo đối tượng Stock tương ứng
-                purchasedPossibleStock = new Stock(stockNumber, stockQuantity, stockName);
+                purchasedPossibleStock = new Stock(stockNumber, stockQuantity, stockName, stockPrice);
                 break;
             }
         }
@@ -82,38 +99,62 @@ public class StockServer {
         // Kiểm tra xem cổ phiếu có tồn tại và số lượng mua hợp lệ
         if (purchasedPossibleStock != null && quantity > 0 && quantity <= purchasedPossibleStock.getQuanity()) {
             // Tạo thông tin cổ phiếu đã mua
+            purchasedPossibleStock.setQuanity(quantity);
             LocalTime purchaseDate = LocalTime.now();
             StockInformation purchasedInfo = new StockInformation(1, purchasedPossibleStock, purchaseDate);
-
             // Thêm thông tin cổ phiếu đã mua vào danh sách userStocks
             userStocks.add(purchasedInfo);
-
-            // Trừ đi số lượng cổ phiếu đã mua khỏi danh sách cổ phiếu tồn kho
-            purchasedPossibleStock.setQuanity(purchasedPossibleStock.getQuanity() - quantity);
-
+            int remainingQuantity = remainingStockQuantities.get(stockNo) - quantity;
+            remainingStockQuantities.put(stockNo, remainingQuantity);
             return true; // Trả về true nếu giao dịch mua cổ phiếu thành công
         }
-
         return false; // Trả về false nếu không mua được cổ phiếu
     }
 
+    public String listOwnStocks() {
+        StringBuilder builder = new StringBuilder();
+        for (StockInformation stockInformation : userStocks) {
+            int commandType = stockInformation.getCommandType();
+            Stock stock = stockInformation.getStock();
+            int stockNumber = stock.getStockNo();
+            String stockName = stock.getName();
+            int stockQuantity = stock.getQuanity();
+            LocalTime purchaseDate = stockInformation.getPurchaseDate();
+            builder.append("Command Type: ").append(commandType).append(", ")
+                    .append("Stock Number: ").append(stockNumber).append(", ")
+                    .append("Stock Name: ").append(stockName).append(", ")
+                    .append("Stock Quantity: ").append(stockQuantity).append(", ")
+                    .append("Purchase Date: ").append(purchaseDate).append("\n");
+        }
 
-    public static void main(String[] args) {
-        StockServer stockServer = new StockServer();
-        System.out.println(stockServer.listAllStocks());
-        int stockNoToPurchase = 2; // Số thứ tự của cổ phiếu bạn muốn mua
-        int quantityToPurchase = 13; // Số lượng cổ phiếu bạn muốn mua
-   boolean purchaseResult =stockServer.purchase(stockNoToPurchase, quantityToPurchase);
-   if (purchaseResult = true) {
-       System.out.println("thành công");
-   }else{
-       System.out.println("không thành công");
-   }
+        return builder.toString();
+    }
+
+    public boolean sellStock(int stockNo, int quantity) {
+        return false;
     }
 
 
-
 }
+
+
+//    public static void main(String[] args) {
+//        StockServer stockServer = new StockServer();
+//        int stockNoToPurchase = 1; // Số thứ tự của cổ phiếu bạn muốn mua
+//        int quantityToPurchase = 10; // Số lượng cổ phiếu bạn muốn mua
+//        System.out.println(stockServer.listAllStocks());
+//
+//        boolean purchaseResult = stockServer.purchase(stockNoToPurchase, quantityToPurchase);
+//        if (purchaseResult == true) {
+//            System.out.println("thành công");
+//        } else {
+//            System.out.println("không thành công");
+//        }
+//        System.out.println(stockServer.listOwnStocks());
+//        System.out.println("Stock còn lại trong danh sách:");
+//        System.out.println(stockServer.listAllStocks());
+//    }
+//}
 
 
 

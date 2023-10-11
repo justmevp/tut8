@@ -22,6 +22,9 @@ public class Stock {
     private int stockNo;
     private int quanity;
 
+    private String name;
+    private double price;
+
 
     public String getName() {
         return name;
@@ -31,8 +34,6 @@ public class Stock {
         this.name = name;
     }
 
-    private String name;
-    private double price;
 
     public double getPrice() {
         return price;

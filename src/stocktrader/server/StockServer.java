@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class StockServer {
 
@@ -17,6 +18,7 @@ public class StockServer {
     private List<Stock> stocks = new ArrayList<>();
     private List<StockInformation> userStocks = new ArrayList<>();
     private Map<Integer, Integer> remainingStockQuantities = new HashMap<>();
+    private double userMoney = 20000;
 
 
     public StockServer() {
@@ -95,15 +97,19 @@ public class StockServer {
         }
         // Kiểm tra xem cổ phiếu có tồn tại và số lượng mua hợp lệ
         if (purchasedPossibleStock != null && quantity > 0 && quantity <= purchasedPossibleStock.getQuanity()) {
-            // Tạo thông tin cổ phiếu đã mua
-            purchasedPossibleStock.setQuanity(quantity);
-            LocalTime purchaseDate = LocalTime.now();
-            StockInformation purchasedInfo = new StockInformation(1, purchasedPossibleStock, purchaseDate);
-            // Thêm thông tin cổ phiếu đã mua vào danh sách userStocks
-            userStocks.add(purchasedInfo);
-            int remainingQuantity = remainingStockQuantities.get(stockNo) - quantity;
-            remainingStockQuantities.put(stockNo, remainingQuantity);
-            return true; // Trả về true nếu giao dịch mua cổ phiếu thành công
+            double totalPurchasePrize = purchasedPossibleStock.getPrice() * stockNo;
+            if (userMoney >= totalPurchasePrize) {
+
+                // Tạo thông tin cổ phiếu đã mua
+                purchasedPossibleStock.setQuanity(quantity);
+                LocalTime purchaseDate = LocalTime.now();
+                StockInformation purchasedInfo = new StockInformation(1, purchasedPossibleStock, purchaseDate);
+                // Thêm thông tin cổ phiếu đã mua vào danh sách userStocks
+                userStocks.add(purchasedInfo);
+                int remainingQuantity = remainingStockQuantities.get(stockNo) - quantity;
+                remainingStockQuantities.put(stockNo, remainingQuantity);
+                return true; // Trả về true nếu giao dịch mua cổ phiếu thành công
+            }
         }
         return false; // Trả về false nếu không mua được cổ phiếu
     }
@@ -118,9 +124,8 @@ public class StockServer {
             int stockQuantity = stock.getQuanity();
             double stockPrice = stock.getPrice();
             LocalTime purchaseDate = stockInformation.getTransactionDate();
-            builder .append("Command type: ").append(commandType).append(", ")
-                    .append(stockNumber).append(", ")
-                    .append("Stock No: ").append(stockName).append(", ")
+            builder.append(stockNumber).append(", ")
+                    .append("Stock name: ").append(stockName).append(", ")
                     .append(stockQuantity).append(", ")
                     .append("transaction date: ").append(purchaseDate).append(", ")
                     .append(stockPrice).append("\n");
@@ -130,18 +135,18 @@ public class StockServer {
     }
 
 
-    public boolean sellStock(int stockNo, int quantity) {
+    public boolean sellStocks(int stockNo, int quantity) {
         String myStocks = listOwnStocks();
         String[] myStocksLines = myStocks.split("\n");
         Stock possibleSelledStock = null;
         for (String myStocksLine : myStocksLines) {
             String[] stockInfo = myStocksLine.split(", ");
             if (stockInfo.length >= 4) {
-                int stockNumber = Integer.parseInt(stockInfo[1]);
+                int stockNumber = Integer.parseInt(stockInfo[0]);
                 if (stockNumber == stockNo) {
-                    int stockQuantity = Integer.parseInt(stockInfo[3]);
-                    String stockName = stockInfo[2];
-                    double stockPrize = Double.parseDouble(stockInfo[5]);
+                    int stockQuantity = Integer.parseInt(stockInfo[2]);
+                    String stockName = stockInfo[1];
+                    double stockPrize = Double.parseDouble(stockInfo[3]);
                     possibleSelledStock = new Stock(stockNumber, stockQuantity, stockName, stockPrize);
                     break;
                 }
@@ -149,6 +154,7 @@ public class StockServer {
             }
         }
         if (possibleSelledStock != null && quantity > 0 && quantity <= possibleSelledStock.getQuanity()) {
+//            double totalPrice = possibleSelledStock.getPrice() * quantity;
             possibleSelledStock.setQuanity(possibleSelledStock.getQuanity() - quantity);
             LocalTime purchaseDate = LocalTime.now();
             StockInformation soldInfo = new StockInformation(2, possibleSelledStock, purchaseDate);
@@ -170,36 +176,65 @@ public class StockServer {
         userStocks = updatedUserStocks;
     }
 
-//    public static void main(String[] args) {
-//        StockServer stockServer = new StockServer();
-//        System.out.println(stockServer.listAllStocks());
-//        int stockNoToPurchase = 1; // Số thứ tự của cổ phiếu bạn muốn mua
-//        int quantityToPurchase = 10; // Số lượng cổ phiếu bạn muốn mua
-//        boolean purchaseResult = stockServer.purchase(stockNoToPurchase, quantityToPurchase);
-//        if (purchaseResult == true) {
-//            System.out.println("thành công");
-//            System.out.println(stockServer.listOwnStocks());
-//
-//        } else {
-//            System.out.println("không thành công");
-//        }
-//
-//        int stockNoToSell = 1;
-//        int stockQuantityToSell = 5;
-//        if (purchaseResult == true) {
-//            {
-//                boolean sellResult = stockServer.sellStock(stockNoToSell, stockQuantityToSell);
-//                if (sellResult == true) {
-//                    System.out.println("bán thành công");
-//                    System.out.println(stockServer.listOwnStocks());
-//                }else{
-//                    System.out.println("bán ko đc");
-//                }
-//
-//            }
-//            }
-//        }
+    public void nextDay() {
+        int numberOfDays = 30;
+        for (Stock stock : stocks) {
+            double stockPrice = stock.getPrice();
+            for (int day = 2; day <= numberOfDays; day++) {
+                double stockPriceChange = ThreadLocalRandom.current().nextDouble(-10.0, 10.0);
+                stockPrice += stockPriceChange;
+                stock.setPrice(stockPrice); // Cập nhật giá cổ phiếu
+                System.out.println("Ngày " + day + " - Giá cổ phiếu " + stock.getName() + ": " + stockPrice);
+            }
+        }
     }
+
+public Double checkBalance() {
+    double stockValue = 0;
+    for (StockInformation stockInformation : userStocks) {
+        Stock stock = stockInformation.getStock();
+        int stockQuantity = stock.getQuanity();
+        double stockPrice = stock.getPrice();
+        stockValue += stockPrice * stockQuantity;
+    }
+    return userMoney - stockValue;
+}
+
+
+
+    public static void main(String[] args) {
+        StockServer stockServer = new StockServer();
+        System.out.println(stockServer.listAllStocks());
+        int stockNoToPurchase = 1; // Số thứ tự của cổ phiếu bạn muốn mua
+        int quantityToPurchase = 10; // Số lượng cổ phiếu bạn muốn mua
+        boolean purchaseResult = stockServer.purchase(stockNoToPurchase, quantityToPurchase);
+        if (purchaseResult == true) {
+            System.out.println("thành công");
+            System.out.println(stockServer.listOwnStocks());
+
+        } else {
+            System.out.println("không thành công");
+        }
+
+        int stockNoToSell = 1;
+        int stockQuantityToSell = 5;
+        if (purchaseResult == true) {
+            {
+                boolean sellResult = stockServer.sellStocks(stockNoToSell, stockQuantityToSell);
+                if (sellResult == true) {
+                    System.out.println("bán thành công");
+                    System.out.println(stockServer.listOwnStocks());
+                } else {
+                    System.out.println("bán ko đc");
+                }
+
+            }
+        }
+        System.out.println(stockServer.checkBalance());
+
+
+    }
+}
 
 
 

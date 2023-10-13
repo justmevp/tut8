@@ -1,11 +1,13 @@
 package stocktrader.client;
 
+import stocktrader.model.FileHandle;
 import stocktrader.server.StockServer;
 
 import java.util.Scanner;
 
-public class StockClient {
-    StockServer stockServer = new StockServer();
+public class StockClient  {
+    FileHandle fileHandle = new FileHandle("file_path_here");
+    StockServer stockServer = new StockServer(fileHandle);
     private boolean isLoggedIn = false;
     public void randomPrize(){
        stockServer.nextDay();
@@ -77,6 +79,9 @@ public class StockClient {
     public void checkBalance(){
         System.out.println(stockServer.checkBalance());
     }
+    public void updateStockPrice(){
+     stockServer.nextDay();
+    }
 
     public static void main(String[] args) {
         StockClient client = new StockClient();
@@ -87,6 +92,7 @@ public class StockClient {
             System.out.println("4.Check your stocks:");
             System.out.println("5.Sell your stocks:");
             System.out.println("6.Check Balance: ");
+            System.out.println("7.Update Stocks' price");
             Scanner sc = new Scanner(System.in);
             int choice = sc.nextInt();
             switch (choice) {
@@ -97,6 +103,7 @@ public class StockClient {
                     if (client.isLoggedIn) {
                         client.seeAllStock();
                     } else {
+
                         System.out.println("Please login first");
                     }
                     break;
@@ -124,6 +131,13 @@ public class StockClient {
                 case 6:
                     if (client.isLoggedIn) {
                         client.checkBalance();
+                    } else {
+                        System.out.println("Please login first");
+                    }
+                    break;
+                case 7:
+                    if (client.isLoggedIn) {
+                        client.updateStockPrice();
                     } else {
                         System.out.println("Please login first");
                     }

@@ -1,13 +1,7 @@
-package stocktrader;
+package stocktrader.model.entity;
 
 public class Stock {
-    public int getStockNo() {
-        return stockNo;
-    }
 
-    public void setStockNo(int stockNo) {
-        this.stockNo = stockNo;
-    }
 
     public int getQuanity() {
         return quanity;
@@ -18,8 +12,6 @@ public class Stock {
     }
 
 
-
-    private int stockNo;
     private int quanity;
 
     private String name;
@@ -43,8 +35,8 @@ public class Stock {
         this.price = price;
     }
 
-    public Stock(int stockNo, int quanity, String name, double price) {
-        this.stockNo = stockNo;
+    public Stock(String name, int  quanity, double price) {
+
         this.quanity = quanity;
         this.name = name;
         this.price = price;

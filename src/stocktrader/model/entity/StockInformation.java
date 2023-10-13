@@ -1,4 +1,6 @@
-package stocktrader;
+package stocktrader.model.entity;
+
+import stocktrader.model.entity.Stock;
 
 import java.time.LocalTime;
 
@@ -19,13 +21,8 @@ public class StockInformation {
         this.commandType = commandType;
     }
 
-    public Stock getStock() {
-        return stock;
-    }
 
-    public void setStock(Stock stock) {
-        this.stock = stock;
-    }
+
 
     public LocalTime getTransactionDate() {
         return transactionDate;
@@ -33,6 +30,14 @@ public class StockInformation {
 
     public void setTransactionDate(LocalTime transactionDate) {
         this.transactionDate = transactionDate;
+    }
+
+    public Stock getStock() {
+        return stock;
+    }
+
+    public void setStock(Stock stock) {
+        this.stock = stock;
     }
 
     private int commandType;

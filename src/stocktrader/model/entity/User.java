@@ -1,4 +1,4 @@
-package stocktrader;
+package stocktrader.model.entity;
 
 public class User {
 
@@ -26,16 +26,10 @@ public class User {
     public User(String username, String password) {
         this.username = username;
         this.password = password;
-        this.loggedIn = false;
+
     }
 
-    public boolean isLoggedIn() {
-        return loggedIn;
-    }
 
-    public void setLoggedIn(boolean loggedIn) {
-        this.loggedIn = loggedIn;
-    }
 
-    private boolean loggedIn;
+
 }

@@ -7,6 +7,8 @@ import stocktrader.model.entity.User;
 import stocktrader.model.repository.UserListRepository;
 import stocktrader.model.repository.UserRepository;
 
+import java.io.File;
+import java.io.IOException;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,23 +26,14 @@ public class StockServer {
     private Map<Integer, Integer> remainingStockQuantities = new HashMap<>();
     private double userMoney = 20000;
     private boolean isLoggedIn = false;
-    private UserListRepository userListRepository;
-    public StockServer(FileHandle handle) {
-        try {
-            userListRepository = new UserListRepository(handle);
-            users = userListRepository.getUserList(handle);
-        }catch (Exception e ) {
-            users = new ArrayList<>();
-        }
+    FileHandle fileHandle = new FileHandle("userlist.txt");
+    UserListRepository userListRepository = new UserListRepository(fileHandle);
 
-        users.add(new User("user1", "12345"));
-        users.add(new User("user2", "123456"));
-        users.add(new User("user3", "1234567"));
 
+    public StockServer() {
         stocks.add(new Stock("vingroup", 15, 1000));
         stocks.add(new Stock("barcelona", 20, 2000));
         stocks.add(new Stock("intermiami", 6, 3000));
-
 
         for (int i = 0; i < stocks.size(); i++) {
             Stock stock = stocks.get(i);
@@ -48,7 +41,6 @@ public class StockServer {
             remainingStockQuantities.put(stockNumber, stock.getQuanity());
         }
     }
-
 
     public double getStockPrice(int stockNo) {
         for (int i = 0; i < stocks.size(); i++) {
@@ -61,21 +53,25 @@ public class StockServer {
         return 0; // Trả về 0 nếu không tìm thấy cổ phiếu với số thứ tự tương ứng
     }
 
-
     public boolean login(String username, String password) {
+        try{
+        ArrayList<User> users = userListRepository.getUserList();
         for (User user : users) {
             if (user.getUsername().equals(username) && user.getPassword().equals(password)) {
-                StockServer stockServer = new StockServer();
-                if (stockServer.isLoggedIn = true) {
+                    isLoggedIn = true;
                     System.out.println("Success");
                     return true;
                 }
             }
-        }
+
         System.out.println("Invalid username or password. Please try again.");
         return false;
+    } catch (IOException e) {
+        // Xử lý lỗi khi đọc tệp userlist.txt
+        e.printStackTrace();
+        return false;
     }
-
+}
 
     public String listAllStocks() {
         StringBuilder builder = new StringBuilder();
@@ -92,7 +88,6 @@ public class StockServer {
         }
         return builder.toString();
     }
-
 
     public boolean purchase(int stockNo, int quantity) {
         // Lấy danh sách cổ phiếu từ phương thức listAllStocks
@@ -220,7 +215,6 @@ public class StockServer {
 //    }
     }
 
-
     public Double checkBalance() {
 //        double stockValue = 0;
 //        for (StockInformation stockInformation : userStocks) {
@@ -234,7 +228,8 @@ public class StockServer {
 
 
 //    public static void main(String[] args) {
-//        StockServer stockServer = new StockServer();
+
+
 //        System.out.println(stockServer.listAllStocks());
 //        int stockNoToPurchase = 1; // Số thứ tự của cổ phiếu bạn muốn mua
 //        int quantityToPurchase = 15; // Số lượng cổ phiếu bạn muốn mua
@@ -261,5 +256,4 @@ public class StockServer {
 //            }
 //        }
 //        System.out.println(stockServer.checkBalance());
-//    }
-}
+    }

@@ -3,10 +3,7 @@ package stocktrader.model.repository;
 import stocktrader.model.FileHandle;
 import stocktrader.model.entity.User;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.ObjectInputStream;
+import java.io.*;
 import java.util.ArrayList;
 
 public class UserListRepository {
@@ -14,28 +11,44 @@ public class UserListRepository {
     private FileHandle fileHandle;
 
     public UserListRepository(FileHandle fileHandle) {
-        this.fileHandle = fileHandle;
+       this.fileHandle = fileHandle;
     }
 
 
 
-    public ArrayList<User> getUserList(FileHandle handle) {
-        try {
-            FileInputStream inputStream = new FileInputStream(String.valueOf(handle));
-            ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
-            ArrayList<User> list = (ArrayList<User>) objectInputStream.readObject();
-            objectInputStream.close();
-            return list;
+    public ArrayList<User> getUserList() throws IOException {
+        ArrayList<User> users = new ArrayList<>();
 
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
+        String line;
+        while ((line = this.fileHandle.readLine()) != null) {
+            String[] tokens = line.split(",");
+            if (tokens.length >= 3) {
+                String username = tokens[0];
+                String password = tokens[1];
+                User user = new User(username, password);
+                users.add(user);
+            }
         }
-
+        return users;
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+//    public void addUser(User user) throws IOException {
+//        this.fileHandle.appendLine(user.getId() + "," + user.getName() + "," + user.getMoney());
+//    }
+//
+//    }
 //    public boolean storeUserList() {
 //        // Thực hiện logic để lưu trữ danh sách người dùng vào tệp
 //        return false;

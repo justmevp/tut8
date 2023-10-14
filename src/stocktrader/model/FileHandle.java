@@ -7,23 +7,20 @@ import java.util.ArrayList;
 
 public class FileHandle {
     private String filename;
-
+//    FileHandle userlistFileHandle = new FileHandle("userlist.txt");
     public FileHandle(String filename) {
         this.filename = filename;
     }
-
-
-
 //    public void open() {
 //        // Thực hiện logic mở tệp
 //    }
 //
-//    public ArrayList<String> read() {
-//        // Thực hiện logic đọc tệp
-//        return new ArrayList<>();
-//    }
-//
-//    public void write(String data) {
+    public String readLine() throws IOException {
+        try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
+            return reader.readLine();
+        }
+    }
+    //    public void write(String data) {
 //        // Thực hiện logic ghi tệp
 //    }
 //
@@ -31,7 +28,7 @@ public class FileHandle {
 //        // Thực hiện logic thêm dữ liệu vào tệp
 //    }
 //
-//    public void close() {
-//        // Thực hiện logic đóng tệp
-//    }
+    public void close() {
+        // Thực hiện logic đóng tệp
+    }
 }

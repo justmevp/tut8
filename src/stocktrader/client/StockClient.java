@@ -1,18 +1,17 @@
 package stocktrader.client;
 
 import stocktrader.model.FileHandle;
+import stocktrader.model.entity.User;
+import stocktrader.model.repository.UserListRepository;
 import stocktrader.server.StockServer;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class StockClient  {
-    FileHandle fileHandle = new FileHandle("file_path_here");
-    StockServer stockServer = new StockServer(fileHandle);
+    StockServer stockServer = new StockServer();
     private boolean isLoggedIn = false;
-    public void randomPrize(){
-       stockServer.nextDay();
-    }
-
 
     public void seeAllStock() {
         System.out.println(stockServer.listAllStocks());
@@ -45,7 +44,7 @@ public class StockClient  {
 
     }
 
-    public void logIn() {
+    public void logIn()  {
         System.out.println("Username: ");
         Scanner sc = new Scanner(System.in);
         String userName = sc.nextLine();

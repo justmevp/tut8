@@ -7,50 +7,43 @@ import java.io.*;
 import java.util.ArrayList;
 
 public class UserListRepository {
-    private ArrayList<User> users = new ArrayList<>();
     private FileHandle fileHandle;
+    ArrayList<User> users = new ArrayList<>();
 
     public UserListRepository(FileHandle fileHandle) {
-       this.fileHandle = fileHandle;
+        this.fileHandle = fileHandle;
     }
 
+    public boolean StoreUserList(ArrayList<User> users) {
 
-
-    public ArrayList<User> getUserList() throws IOException {
-        ArrayList<User> users = new ArrayList<>();
-
-        String line;
-        while ((line = this.fileHandle.readLine()) != null) {
-            String[] tokens = line.split(",");
-            if (tokens.length >= 3) {
-                String username = tokens[0];
-                String password = tokens[1];
-                User user = new User(username, password);
-                users.add(user);
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileHandle.getFilename("userlist.txt")))) {
+            for (User user : users) {
+                String userLine = user.getUsername() + "," + user.getPassword();
+                writer.write(userLine);
+                writer.newLine(); // Xuống dòng sau mỗi người dùng
             }
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public ArrayList<User> getUserList() {
+        try (BufferedReader reader = new BufferedReader(new FileReader(fileHandle.getFilename("userlist.txt")))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] tokens = line.split(",");
+                if (tokens.length >= 2) {
+                    String username = tokens[0];
+                    String password = tokens[1];
+                    User user = new User(username, password);
+                    users.add(user);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         return users;
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-//    public void addUser(User user) throws IOException {
-//        this.fileHandle.appendLine(user.getId() + "," + user.getName() + "," + user.getMoney());
-//    }
-//
-//    }
-//    public boolean storeUserList() {
-//        // Thực hiện logic để lưu trữ danh sách người dùng vào tệp
-//        return false;
-//    }
 }

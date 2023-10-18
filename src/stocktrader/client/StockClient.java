@@ -1,17 +1,37 @@
 package stocktrader.client;
-
-import stocktrader.model.FileHandle;
 import stocktrader.model.entity.User;
-import stocktrader.model.repository.UserListRepository;
 import stocktrader.server.StockServer;
-
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Scanner;
 
 public class StockClient  {
+
     StockServer stockServer = new StockServer();
     private boolean isLoggedIn = false;
+    public void singUp(){
+        System.out.println("1. Enter Usernam");
+        Scanner scanner = new Scanner(System.in);
+        String username= scanner.nextLine();
+        Scanner scanner2 = new Scanner(System.in);
+        System.out.println("2. Enter password");
+        String password = scanner2.nextLine();
+        User user = new User(username, password);
+        stockServer.create(user);
+    }
+    public void logIn()  {
+        System.out.println("Username: ");
+        Scanner sc = new Scanner(System.in);
+        String userName = sc.nextLine();
+
+        System.out.println("Password");
+        Scanner sc2 = new Scanner(System.in);
+        String passWord = sc2.nextLine();
+        boolean loginResult = stockServer.login(userName, passWord);
+        if (loginResult) {
+            isLoggedIn = true; // Đánh dấu đã đăng nhập thành công
+        } else {
+            isLoggedIn = false;
+        }
+    }
 
     public void seeAllStock() {
         System.out.println(stockServer.listAllStocks());
@@ -36,7 +56,10 @@ public class StockClient  {
             System.out.println("Fail to purchase");
         }
     }
+    public void userStockHistory(){
+        stockServer.listStockHistory();
 
+    }
 
     public void myStock() {
         System.out.println("Your stocks: ");
@@ -44,21 +67,6 @@ public class StockClient  {
 
     }
 
-    public void logIn()  {
-        System.out.println("Username: ");
-        Scanner sc = new Scanner(System.in);
-        String userName = sc.nextLine();
-
-        System.out.println("Password");
-        Scanner sc2 = new Scanner(System.in);
-        String passWord = sc2.nextLine();
-        boolean loginResult = stockServer.login(userName, passWord);
-        if (loginResult) {
-            isLoggedIn = true; // Đánh dấu đã đăng nhập thành công
-        } else {
-            isLoggedIn = false;
-        }
-    }
 
     public void sellStock() {
         System.out.println("Choose stock");
@@ -80,67 +88,80 @@ public class StockClient  {
     }
     public void updateStockPrice(){
      stockServer.nextDay();
+        System.out.println("Update Successfully");
     }
 
     public static void main(String[] args) {
         StockClient client = new StockClient();
         do {
-            System.out.println("1.Login: ");
-            System.out.println("2.Check all available stock:");
-            System.out.println("3.Buy stock:");
-            System.out.println("4.Check your stocks:");
-            System.out.println("5.Sell your stocks:");
-            System.out.println("6.Check Balance: ");
-            System.out.println("7.Update Stocks' price");
+            System.out.println("1.Sign Up:");
+            System.out.println("2.Login: ");
+            System.out.println("3.Check all available stock:");
+            System.out.println("4.Buy stock:");
+            System.out.println("5.Check your stocks:");
+            System.out.println("6.Sell your stocks:");
+            System.out.println("7.Check Balance: ");
+            System.out.println("8.Update Stocks' price");
+            System.out.println("9.Show History: ");
             Scanner sc = new Scanner(System.in);
             int choice = sc.nextInt();
             switch (choice) {
                 case 1:
-                    client.logIn();
+                    client.singUp();
                     break;
                 case 2:
-                    if (client.isLoggedIn) {
-                        client.seeAllStock();
-                    } else {
-
-                        System.out.println("Please login first");
-                    }
+                    client.logIn();
                     break;
                 case 3:
                     if (client.isLoggedIn) {
-                        client.buyStock();
+                        client.seeAllStock();
                     } else {
                         System.out.println("Please login first");
                     }
                     break;
                 case 4:
                     if (client.isLoggedIn) {
-                        client.myStock();
+                        client.buyStock();
                     } else {
                         System.out.println("Please login first");
                     }
                     break;
                 case 5:
                     if (client.isLoggedIn) {
-                        client.sellStock();
+                        client.myStock();
                     } else {
                         System.out.println("Please login first");
                     }
                     break;
                 case 6:
                     if (client.isLoggedIn) {
-                        client.checkBalance();
+                        client.sellStock();
                     } else {
                         System.out.println("Please login first");
                     }
                     break;
                 case 7:
                     if (client.isLoggedIn) {
+                        client.checkBalance();
+                    } else {
+                        System.out.println("Please login first");
+                    }
+                    break;
+                case 8:
+                    if (client.isLoggedIn) {
                         client.updateStockPrice();
                     } else {
                         System.out.println("Please login first");
                     }
                     break;
+                case 9:
+                    if (client.isLoggedIn) {
+                        client.userStockHistory();
+                    } else {
+                        System.out.println("Please login first");
+                    }
+                    break;
+
             }
         } while (true);
     }

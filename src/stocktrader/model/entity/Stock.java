@@ -35,6 +35,11 @@ public class Stock {
         this.price = price;
     }
 
+    @Override
+    public String toString() {
+        return name + "," + quanity + "," + price;
+    }
+
     public Stock(String name, int  quanity, double price) {
 
         this.quanity = quanity;

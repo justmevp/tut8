@@ -9,7 +9,7 @@ public class StockInformation {
 
     public StockInformation(int commandType, Stock stock, LocalTime transactionDate) {
         this.commandType = commandType;
-        this.stock = stock;
+        this.stock = new Stock(stock.getName(),stock.getQuanity(),stock.getPrice());
         this.transactionDate = transactionDate;
     }
 
@@ -20,9 +20,6 @@ public class StockInformation {
     public void setCommandType(int commandType) {
         this.commandType = commandType;
     }
-
-
-
 
     public LocalTime getTransactionDate() {
         return transactionDate;
